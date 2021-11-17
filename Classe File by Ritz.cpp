@@ -2,7 +2,6 @@
 //
 using namespace std;
 #include <iostream>
-#include <fstream>
 
 class FileByRiz
 {
