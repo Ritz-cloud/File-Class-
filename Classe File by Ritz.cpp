@@ -1,39 +1,56 @@
-// File_fprintf_fscanf.cpp : Questo file contiene la funzione 'main', in cui inizia e termina l'esecuzione del programma.
-//
-using namespace std;
 #include <iostream>
 
 class FileByRiz
 {
 private:
 	FILE* pFile;
+	string nomeFile;
 
 public:
-	FileByRiz(const char nomeFile[], const char metodoDiApertura[])
+	FileByRiz(string pNomeFile)
 	{
-		fopen_s(&pFile, nomeFile, metodoDiApertura);
+		nomeFile = pNomeFile;
 	}
 
-	FileByRiz()
+	void WriteToFile(string dati, const char metod[])
 	{
-		fopen_s(&pFile, "nonamed.txt", "w+");
+		int err = fopen_s(&pFile, nomeFile.c_str(), metod);
+		if (err == 0)
+		{
+			fprintf(pFile, "%s", dati.c_str());
+			fclose(pFile);
+		}
 	}
 
-	void WriteFile(string dati)
+	void WriteLineToFile(string dati, const char metod[])
 	{
-		fprintf(pFile, "%s", dati.c_str());
+		int err = fopen_s(&pFile, nomeFile.c_str(), metod);
+		if (err == 0)
+		{
+			fprintf(pFile, "%s\n", dati.c_str());
+			fclose(pFile);
+		}
 	}
 
 	string ReadAllFile()
 	{
-		char buffer[1024];
 		string dati = "";
 
-		while (!feof(pFile))
+		int err = fopen_s(&pFile, nomeFile.c_str(), "r");
+		if (err == 0)
 		{
-			fgets(buffer, _countof(buffer), pFile);
-			dati += buffer;
+			while (!feof(pFile))
+			{
+				char buffer = fgetc(pFile);
+				if (feof(pFile) && (buffer == '\n'))
+					break;
+
+				dati += buffer;
+			}
+			fclose(pFile);
 		}
+		else
+			cout << "Impossibile aprire file!";
 
 		return dati;
 	}
@@ -44,39 +61,44 @@ public:
 		string dati = "";
 		int cont = 0;
 
-		while (!feof(pFile))
+		int err = fopen_s(&pFile, nomeFile.c_str(), "r");
+		if (err == 0)
 		{
-			fgets(buffer, _countof(buffer), pFile);
+			while (!feof(pFile))
+			{
+				fgets(buffer, _countof(buffer), pFile);
 
-			if(riga == cont)
-			dati += buffer;
+				if (riga == cont)
+					dati += buffer;
 
-			cont++;
+				cont++;
+			}
+			fclose(pFile);
 		}
+		else
+			cout << "Impossibile aprire file!";
 
 		return dati;
 	}
 
-	void Close()
+	int ReturnNumbersOfLine()
 	{
-		fclose(pFile);
+		int cont = 0;
+		char buffer[1024];
+
+		int err = fopen_s(&pFile, nomeFile.c_str(), "r");
+		if (err == 0)
+		{
+			while (!feof(pFile))
+			{
+				fgets(buffer, 1024, pFile);
+				cont++;
+			}
+			fclose(pFile);
+		}
+		else
+			cout << "Impossibile aprire file!";
+
+		return cont;
 	}
 };
-
-int main()
-{
-  //Sovrascrivi/scrivi il file 
-	FileByRiz prova("prova.txt", "w");
-	prova.WriteFile("Emiddio e' BLL");
-	prova.Close();
-
-  //Leggi tutto il file
-	FileByRiz prova1("prova.txt", "r");
-	cout << prova1.ReadAllFile();
-	prova1.Close();
-  
-  //Leggi la riga che vuoi tu
-	//FileByRiz prova2("prova.txt", "r");
-	//cout << prova2.ReadLineOfFile(1);
-	//prova2.Close();
-}
